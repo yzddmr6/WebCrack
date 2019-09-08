@@ -14,6 +14,28 @@ https://yzddmr6.tk/2019/08/18/webcrack/
 
 ## debug记事本
 
+
+2019.9.8
+自闭CTF again。。。
+
+在星球里开源，准备着手编写开发文档。
+
+2019.9.7
+
+自闭CTF。。。。。。。
+
+看了下跑的结果，并且跟tidesec的版本比较了一下
+
+web_pwd_common_crack 跑出来11个，其中7个可以登录，4个是逻辑上的误报跟waf拦截后的误报。
+
+webcrack 跑出来19个，其中16个可以登录，2个是ecshop的误报，1个是小众cms逻辑的误报。
+
+webcrack比web_pwd_common_crack多探测出来的9个中
+
+有5个是万能密码漏洞，2个是发现的web_pwd_common_crack的漏报，2个是动态字典探测出来的弱口令。
+
+感觉还不错，明天发到星球里让大家试一下
+
 2019.9.6
 
 今天又是debug的一天
@@ -32,9 +54,9 @@ https://yzddmr6.tk/2019/08/18/webcrack/
 
 ecshop真是个神奇的cms。。。。
 
-当你输错密码的时候
+假如说密码是yzddmr6
 
-admin888 与其他的密码返回值居然不一样
+但是你输入admin888 与其他错误密码后的返回页面居然不一样。。。
 
 
 long long ago...
