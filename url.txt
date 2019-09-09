@@ -1,0 +1,5 @@
+#http://www.baidu.cn/login.php
+http://www.baidu.cn/login.asp
+http://www.baidu.cn/login.aspx
+http://www.baidu.cn/login.php
+http://www.baidu.cn/login.jsp
