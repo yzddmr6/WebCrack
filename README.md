@@ -13,7 +13,7 @@ WebCrack是一款web后台弱口令/万能密码批量爆破、检测工具。
 
 ## 开发文档
 
-https://yzddmr6.tk/2019/09/09/webcrack-release/
+https://yzddmr6.tk/posts/webcrack-release/
 
 ## 工具特点
 
