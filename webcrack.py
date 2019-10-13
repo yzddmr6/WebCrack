@@ -2,7 +2,7 @@
 type: python3
 author: yzddmr6
 github: https://github.com/yzddmr6/WebCrack
-link: https://yzddmr6.tk/2019/09/09/webcrack-release/
+link: https://yzddmr6.tk/posts/webcrack-release/
 
 '''
 
