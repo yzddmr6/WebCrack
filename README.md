@@ -2,18 +2,16 @@
 
 ## 工具简介
 
-WebCrack是一款web后台弱口令/万能密码批量爆破、检测工具。
-
-不仅支持如discuz，织梦，phpmyadmin等主流CMS
-
-并且对于绝大多数小众CMS甚至个人开发网站后台都有效果
-
-在工具中导入后台地址即可进行自动化检测。
+WebCrack是一款web后台弱口令/万能密码批量检测工具，在工具中导入后台地址即可进行自动化检测。
 
 
 ## 开发文档
 
 https://yzddmr6.tk/posts/webcrack-release/
+
+## 更新日志
+
+[更新日志](changelog.md)
 
 ## 工具特点
 
@@ -23,9 +21,9 @@ https://yzddmr6.tk/posts/webcrack-release/
 
 * 可以通过域名生成动态字典
 
-* 可以探测系统是否存在因为设计缺陷而造成的万能密码漏洞
+* 可以检测万能密码漏洞
 
-* 支持自定义爆破参数
+* 支持自定义爆破规则
 
 
 ## 使用方法
@@ -42,7 +40,7 @@ pip install -r requirements.txt
 
 运行脚本
 ```
->python3 webcrack.py
+>python3 WebCrack.py
 
 *****************************************************
 *                                                   *
@@ -58,7 +56,7 @@ File or Url:
 
 开始爆破
 
-![image](https://user-images.githubusercontent.com/46088090/64511415-d9e64980-d316-11e9-8b19-0487c8bf14fe.png)
+![image](https://user-images.githubusercontent.com/46088090/75211227-50401080-57be-11ea-903b-61ef6c5353c9.png)
 
 
 爆破的结果会保存在同目录下`web_crack_ok.txt`文件中
@@ -87,8 +85,6 @@ File or Url:
 
 **请勿用于非法用途！否则自行承担一切后果**
 
-## Debug记事本
 
-[Debug记事本](debug.md)
 
 

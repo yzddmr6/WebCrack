@@ -1,4 +1,4 @@
-#http://www.baidu.cn/login.php
+#若为#开头则忽略此行
 http://www.baidu.cn/login.asp
 http://www.baidu.cn/login.aspx
 http://www.baidu.cn/login.php
