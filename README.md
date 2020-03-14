@@ -1,4 +1,4 @@
-# WebCrack
+# WebCrack `v(1.1)`
 
 ## 工具简介
 
