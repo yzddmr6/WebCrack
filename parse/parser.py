@@ -90,6 +90,8 @@ class Parser:
         elif action_path.startswith('/'):
             root_path = res.scheme + '://' + res.netloc
             path = root_path + action_path
+        elif action_path == '':
+            path = url
         else:
             relative_path = url.rstrip(url.split('/')[-1])
             path = relative_path + action_path
