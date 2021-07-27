@@ -1,3 +1,15 @@
+import os
+
+
+def txt2list(txt):
+    ret = []
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), txt)
+    with open(path, "r", encoding="UTF-8") as f:
+        for line in f.readlines():
+            ret.append(line.strip())
+    return ret
+
+
 logConfig = {
     "log_filename": "logs.txt",  # 普通日志文件名称
     "success_filename": "success.txt",  # 成功日志文件名称
@@ -23,13 +35,7 @@ generatorConfig = {
     "dict_config": {
         "base_dict": {
             "username_list": ['admin'],  # 爆破用户名字典
-            "password_list": ['{user}', '123456', '{user}888', '12345678', '123123', '88888888', '888888', 'password',
-                              '123456a',
-                              '{user}123', '{user}123456', '{user}666', '{user}2018', '123456789', '654321', '666666',
-                              '66666666',
-                              '1234567890', '8888888', '987654321', '0123456789', '12345', '1234567', '000000',
-                              '111111',
-                              '5201314', '123123'],  # 爆破密码字典
+            "password_list": txt2list("password_list.txt")  # 爆破密码字典
 
         },
         "domain_dict": {

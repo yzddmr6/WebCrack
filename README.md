@@ -1,4 +1,4 @@
-# WebCrack `v(2.1)`
+# WebCrack `v(2.2)`
 
 ## 工具简介
 
@@ -10,6 +10,12 @@ WebCrack是一款web后台弱口令/万能密码批量检测工具，在工具�
 https://yzddmr6.tk/posts/webcrack-release/
 
 ## 更新日志
+
+### 2021/07/27 `v(2.2)`
+
+* 修复后台页面没有action字段导致的解析问题
+
+* 配置文件字典改为加载txt方式
 
 ### 2021/03/15 `v(2.1)`
 

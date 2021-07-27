@@ -83,16 +83,20 @@ class Parser:
         form_action = str(content).split('\n')[0]
         soup = BS(form_action, "lxml")
         res = urlparse(url)
-        action_path = soup.form['action']
+        try:
+            action_path = soup.form['action']
+        except:
+            self.post_path = url  # 当form中没有action字段时，默认地址为url
+            return
 
-        if action_path.startswith('http'):
+        if action_path.startswith('http'):  # action为绝对路径
             path = action_path
-        elif action_path.startswith('/'):
+        elif action_path.startswith('/'):  # action为根路径
             root_path = res.scheme + '://' + res.netloc
             path = root_path + action_path
-        elif action_path == '':
+        elif action_path == '':  # action为空
             path = url
-        else:
+        else:  # action为同目录下相对路径
             relative_path = url.rstrip(url.split('/')[-1])
             path = relative_path + action_path
         if not path:
