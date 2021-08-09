@@ -7,7 +7,7 @@ WebCrack是一款web后台弱口令/万能密码批量检测工具，在工具�
 
 ## 开发文档
 
-https://yzddmr6.tk/posts/webcrack-release/
+https://yzddmr6.com/posts/webcrack-release/
 
 ## 更新日志
 
